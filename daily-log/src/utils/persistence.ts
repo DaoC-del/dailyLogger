@@ -53,6 +53,19 @@ class FileSystemPersistence {
     }
     return "";
   }
+
+  public downloadLogs(date: string, timezone: string = "Asia/Tokyo"): void {
+    const content = this.read(date, timezone);
+    const fileName = `${date}.txt`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 }
 
 /**
@@ -83,6 +96,19 @@ class BrowserPersistence {
   public read(date: string, timezone: string = "Asia/Tokyo"): string {
     const storageKey = this.getStorageKey(date);
     return localStorage.getItem(storageKey) || "";
+  }
+
+  public downloadLogs(date: string, timezone: string = "Asia/Tokyo"): void {
+    const content = this.read(date, timezone);
+    const fileName = `${date}.txt`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }
 

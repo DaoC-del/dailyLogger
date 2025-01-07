@@ -1,6 +1,6 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import Home from "../pages/Home";
+import Home from "../Home";
 import AddLog from "../pages/AddLog";
 import LogDetail from "../pages/LogDetail";
 import { RootStackParamList } from "../../src/types/navigationTypes";
