@@ -3,15 +3,16 @@ import path from "path";
 
 /**
  * 获取指定时区的当前日期 (YYYY-MM-DD)
- * @param timezone 时区 (如 "America/New_York")
+ * @param timezone 时区 (如 "Asia/Tokyo")
  */
 const getDateByTimezone = (timezone: string): string => {
   const now = new Date();
   const utcOffset = now.getTimezoneOffset() * 60000; // UTC 偏移
   const localTime = new Date(now.getTime() + utcOffset); // 本地时间
-  const timezoneOffset = new Date(
-    localTime.toLocaleString("en-US", { timeZone: timezone })
-  ).getTime() - localTime.getTime();
+  const timezoneOffset =
+    new Date(
+      localTime.toLocaleString("en-US", { timeZone: timezone })
+    ).getTime() - localTime.getTime();
   const targetTime = new Date(now.getTime() + timezoneOffset);
 
   const year = targetTime.getFullYear();
@@ -21,9 +22,9 @@ const getDateByTimezone = (timezone: string): string => {
 };
 
 /**
- * 持久化工具类
+ * 持久化工具类 (基于文件系统)
  */
-class Persistence {
+class FileSystemPersistence {
   private directory: string;
 
   constructor(directory: string = "./logs") {
@@ -37,7 +38,7 @@ class Persistence {
     return path.join(this.directory, `${date}.txt`);
   }
 
-  public append(data: string, timezone: string = "America/New_York"): void {
+  public append(data: string, timezone: string = "Asia/Tokyo"): void {
     const date = getDateByTimezone(timezone);
     const filePath = this.getLogFilePath(date);
     const timestamp = new Date().toISOString();
@@ -45,7 +46,7 @@ class Persistence {
     fs.appendFileSync(filePath, content, { encoding: "utf-8" });
   }
 
-  public read(date: string): string {
+  public read(date: string, timezone: string = "Asia/Tokyo"): string {
     const filePath = this.getLogFilePath(date);
     if (fs.existsSync(filePath)) {
       return fs.readFileSync(filePath, { encoding: "utf-8" });
@@ -54,4 +55,42 @@ class Persistence {
   }
 }
 
-export const persistence = new Persistence();
+/**
+ * 持久化工具类 (基于 localStorage)
+ */
+class BrowserPersistence {
+  private storageKeyPrefix: string;
+
+  constructor(storageKeyPrefix: string = "logs_") {
+    this.storageKeyPrefix = storageKeyPrefix;
+  }
+
+  private getStorageKey(date: string): string {
+    return `${this.storageKeyPrefix}${date}`;
+  }
+
+  public append(data: string, timezone: string = "Asia/Tokyo"): void {
+    const date = getDateByTimezone(timezone);
+    const storageKey = this.getStorageKey(date);
+
+    const existingLogs = localStorage.getItem(storageKey) || "";
+    const timestamp = new Date().toISOString();
+    const newLog = `[${timestamp}] ${data}`;
+
+    localStorage.setItem(storageKey, existingLogs + newLog + "\n");
+  }
+
+  public read(date: string, timezone: string = "Asia/Tokyo"): string {
+    const storageKey = this.getStorageKey(date);
+    return localStorage.getItem(storageKey) || "";
+  }
+}
+
+/**
+ * 动态持久化工具选择
+ */
+const isBrowser = typeof window !== "undefined";
+
+export const persistence = isBrowser
+  ? new BrowserPersistence()
+  : new FileSystemPersistence();
