@@ -1,7 +1,12 @@
 import React from "react";
-import { Form, Input, Button, Select, DatePicker } from "antd";
-
-const { Option } = Select;
+import { View, StyleSheet, Text } from "react-native";
+import {
+  Button,
+  InputItem,
+  Picker,
+  DatePicker,
+  List,
+} from "@ant-design/react-native";
 
 type FieldType = "number" | "text" | "select" | "date";
 
@@ -12,63 +17,106 @@ interface LogFormProps {
     type: FieldType;
     options?: { label: string; value: any }[];
     required?: boolean;
-    rules?: any[]; // 动态校验规则
   }[];
-  onFinish: (values: any) => void;
+  onFinish: (values: Record<string, any>) => void;
 }
 
 const LogForm: React.FC<LogFormProps> = ({ fields, onFinish }) => {
-  const [form] = Form.useForm();
+  const formData: Record<string, any> = {}; // Store form data
 
-  // 动态渲染表单字段
-  const renderField = (field: LogFormProps["fields"][0]) => {
-    switch (field.type) {
-      case "text":
-        return <Input />;
-      case "number":
-        return <Input type="number" />;
-      case "select":
-        return (
-          <Select>
-            {field.options?.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        );
-      case "date":
-        return <DatePicker style={{ width: "100%" }} />;
-      default:
-        return null;
-    }
+  const handleSubmit = () => {
+    onFinish(formData); // Submit form
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      {fields.map((field) => (
-        <Form.Item
-          key={field.name}
-          label={field.label}
-          name={field.name}
-          rules={[
-            { required: field.required, message: `${field.label} 是必填项` },
-            ...(field.rules || []), // 动态扩展校验规则
-          ]}
-        >
-          {renderField(field)}
-        </Form.Item>
-      ))}
-      <Form.Item>
-        <Button type="primary" htmlType="submit" style={{ marginRight: "8px" }}>
+    <View style={styles.container}>
+      {/* Form Content */}
+      <View style={styles.formContainer}>
+        <List>
+          {fields
+            .map((field) => {
+              switch (field.type) {
+                case "text":
+                  return (
+                    <InputItem
+                      key={field.name}
+                      clear
+                      placeholder={`请输入${field.label}`}
+                      onChange={(value) => (formData[field.name] = value)}
+                    >
+                      <Text>{field.label}</Text>
+                    </InputItem>
+                  );
+                case "number":
+                  return (
+                    <InputItem
+                      key={field.name}
+                      type="number"
+                      clear
+                      placeholder={`请输入${field.label}`}
+                      onChange={(value) => (formData[field.name] = value)}
+                    >
+                      <Text>{field.label}</Text>
+                    </InputItem>
+                  );
+                case "select":
+                  return (
+                    <Picker
+                      key={field.name}
+                      data={field.options || []}
+                      cols={1}
+                      onChange={(value) => (formData[field.name] = value[0])}
+                    >
+                      <List.Item arrow="horizontal">
+                        <Text>{field.label}</Text>
+                      </List.Item>
+                    </Picker>
+                  );
+                case "date":
+                  return (
+                    <DatePicker
+                      key={field.name}
+                      mode="date"
+                      onChange={(date) => (formData[field.name] = date)}
+                    >
+                      <List.Item arrow="horizontal">
+                        <Text>{field.label}</Text>
+                      </List.Item>
+                    </DatePicker>
+                  );
+                default:
+                  return null;
+              }
+            })
+            .filter((item) => item !== null)}
+        </List>
+      </View>
+
+      {/* Submit Button */}
+      <View style={styles.buttonContainer}>
+        <Button type="primary" onPress={handleSubmit}>
           提交
         </Button>
-        <Button htmlType="button" onClick={() => form.resetFields()}>
-          重置
-        </Button>
-      </Form.Item>
-    </Form>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1, // Full-screen layout
+    flexDirection: "column",
+    justifyContent: "space-between", // Push button to the bottom
+    padding: 16,
+  },
+  formContainer: {
+    flex: 1, // Expand to fill remaining space
+    justifyContent: "flex-start",
+  },
+  buttonContainer: {
+    alignSelf: "stretch", // Ensure full-width button
+    marginTop: 16, // Add spacing from the form
+  },
+});
 
 export default LogForm;

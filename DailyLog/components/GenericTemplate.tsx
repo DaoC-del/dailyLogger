@@ -1,10 +1,9 @@
 import React from "react";
-import { Layout, Card, Button, message } from "antd";
+import { View, StyleSheet } from "react-native";
+import { Card, Button } from "@ant-design/react-native";
 import LogForm from "@/components/LogForm";
 import { useRouter } from "expo-router";
 import { persistence } from "@/utils/persistence";
-
-const { Content } = Layout;
 
 interface GenericFormProps {
   title: string;
@@ -20,59 +19,54 @@ interface GenericFormProps {
 const GenericForm: React.FC<GenericFormProps> = ({ title, fields }) => {
   const router = useRouter();
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: Record<string, any>) => {
     try {
       const logData = JSON.stringify({
         ...values,
         timestamp: new Date().toISOString(),
       });
-      await persistence.append(logData); // 保存日志
-      message.success("日志已成功记录！");
-      setTimeout(() => router.push("/"), 1000); // 跳转到首页
+      await persistence.append(logData); // Save log
+      console.log("日志已成功记录！");
+      router.push("/");
     } catch (error) {
-      message.error("日志保存失败！");
-      console.error(error);
+      console.error("日志保存失败：", error);
     }
-  };
-
-  const handleDownloadLogs = async () => {
-    const today = new Date().toISOString().slice(0, 10);
-    try {
-      await persistence.downloadLogs(today);
-      message.info("日志下载成功！");
-    } catch (error) {
-      message.error("日志下载失败！");
-      console.error(error);
-    }
-  };
-
-  const handleBackHome = () => {
-    router.push("/");
   };
 
   return (
-    <Layout style={{ padding: "24px" }}>
-      <Content>
-        <Card title={title} bordered={false}>
-          <LogForm fields={fields} onFinish={handleFinish} />
-          <Button
-            type="default"
-            style={{ marginTop: "16px" }}
-            onClick={handleDownloadLogs}
-          >
-            下载今日日志
-          </Button>
-          <Button
-            type="default"
-            style={{ marginTop: "8px" }}
-            onClick={handleBackHome}
-          >
-            返回首页
-          </Button>
-        </Card>
-      </Content>
-    </Layout>
+    <View style={styles.container}>
+      <Card style={styles.card}>
+        <Card.Header title={title} />
+        <Card.Body>
+          <View style={styles.cardBody}>
+            <LogForm fields={fields} onFinish={handleFinish} />
+          </View>
+        </Card.Body>
+      </Card>
+      <View style={styles.buttonContainer}>
+        <Button onPress={() => router.push("/")}>返回首页</Button>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: "space-between",
+  },
+  card: {
+    flex: 1, // Ensure the card expands to fill the container
+    marginBottom: 16, // Add spacing below the card
+  },
+  cardBody: {
+    flex: 1, // Ensure the card body stretches to accommodate LogForm
+  },
+  buttonContainer: {
+    alignSelf: "center", // Center-align the button horizontally
+    width: "100%", // Ensure full-width button if required
+  },
+});
 
 export default GenericForm;

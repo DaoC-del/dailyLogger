@@ -128,3 +128,32 @@ export const gameFields = [
   { name: "action", label: "操作", type: "text" as FieldType, required: true },
   { name: "note", label: "备注", type: "text" as FieldType },
 ];
+
+export const validateFields = (fields: any[]) => {
+  const errors: string[] = [];
+
+  fields.forEach((field, index) => {
+    if (!field.name) {
+      errors.push(`Field at index ${index} is missing 'name'`);
+    }
+    if (!field.label) {
+      errors.push(`Field at index ${index} is missing 'label'`);
+    }
+    if (!field.type) {
+      errors.push(`Field at index ${index} is missing 'type'`);
+    }
+    if (field.type === "select" && !field.options) {
+      errors.push(
+        `Field '${field.name}' is missing 'options' for type 'select'`
+      );
+    }
+  });
+
+  return errors;
+};
+
+// 示例用法
+const errors = validateFields(dailyTimelineFields);
+if (errors.length > 0) {
+  console.error("Field validation errors:", errors);
+}

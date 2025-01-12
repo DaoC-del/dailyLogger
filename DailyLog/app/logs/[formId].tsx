@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  useRouter,
-  useLocalSearchParams,
-  RelativePathString,
-} from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import GenericForm from "@/components/GenericTemplate";
 import {
   dailyTimelineFields,
@@ -22,12 +18,11 @@ const formMap: Record<string, { title: string; fields: any[] }> = {
 };
 
 const LogFormPage: React.FC = () => {
-  const { formId } = useLocalSearchParams(); // 使用 useLocalSearchParams
+  const { formId } = useLocalSearchParams();
   const router = useRouter();
 
-  // 确保 formId 有效
   if (!formId || typeof formId !== "string" || !(formId in formMap)) {
-    router.push("/"); // 表单 ID 无效时跳转首页
+    router.push("/");
     return null;
   }
 
