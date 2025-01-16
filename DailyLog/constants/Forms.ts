@@ -114,18 +114,29 @@ export const healthFields = [
 export const gameFields = [
   baseFields.date,
   {
-    name: "timeRange",
-    label: "时间段",
-    type: "text" as FieldType,
+    name: "endTime",
+    label: "结束时间",
+    type: "text",
     required: true,
   },
   {
     name: "game",
     label: "游戏名称",
-    type: "text" as FieldType,
+    type: "select",
     required: true,
+    options: [
+      { label: "王者荣耀", value: "king_of_glory" },
+      { label: "英雄联盟", value: "league_of_legends" },
+      { label: "绝地求生", value: "pubg" },
+      { label: "原神", value: "genshin_impact" },
+    ],
   },
-  { name: "action", label: "操作", type: "text" as FieldType, required: true },
+  // {
+  //   name: "playContent",
+  //   label: "游玩内容",
+  //   type: "array",
+  //   required: true,
+  // },
   { name: "note", label: "备注", type: "text" as FieldType },
 ];
 

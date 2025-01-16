@@ -32,6 +32,11 @@ const HomePage: React.FC = () => {
       label: "游戏记录",
       path: "/logs/game" as RelativePathString,
     },
+    {
+      key: "viewLogs",
+      label: "查看日志",
+      path: "/logs/ViewLogs" as RelativePathString, // 新增路径
+    },
   ];
 
   return (
